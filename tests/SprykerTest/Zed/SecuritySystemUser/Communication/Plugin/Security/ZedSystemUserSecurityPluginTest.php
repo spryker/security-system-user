@@ -9,9 +9,11 @@ namespace SprykerTest\Zed\SecuritySystemUser\Communication\Plugin\Security;
 
 use Codeception\Test\Unit;
 use Generated\Shared\Transfer\HttpRequestTransfer;
+use ReflectionClass;
 use Spryker\Shared\Security\Configuration\SecurityConfiguration;
 use Spryker\Zed\Kernel\Communication\AbstractPlugin;
-use Spryker\Zed\SecuritySystemUser\Communication\Plugin\Security\SystemUserSecurityPlugin;
+use Spryker\Zed\Security\Communication\Configurator\SecurityConfigurator;
+use Spryker\Zed\SecuritySystemUser\Communication\Plugin\Security\ZedSystemUserSecurityPlugin;
 use Spryker\Zed\SecuritySystemUser\Communication\Plugin\SessionRedis\SystemUserSessionRedisLifeTimeCalculatorPlugin;
 use Spryker\Zed\SecuritySystemUser\SecuritySystemUserConfig;
 use Symfony\Component\HttpFoundation\Response;
@@ -25,10 +27,10 @@ use Symfony\Component\HttpFoundation\Response;
  * @group Communication
  * @group Plugin
  * @group Security
- * @group SystemUserSecurityPluginTest
+ * @group ZedSystemUserSecurityPluginTest
  * Add your own group annotations below this line
  */
-class SystemUserSecurityPluginTest extends Unit
+class ZedSystemUserSecurityPluginTest extends Unit
 {
     /**
      * @uses \Spryker\Zed\Session\Communication\Plugin\Application\SessionApplicationPlugin::SERVICE_SESSION
@@ -36,13 +38,6 @@ class SystemUserSecurityPluginTest extends Unit
      * @var string
      */
     protected const SERVICE_SESSION = 'session';
-
-    /**
-     * @uses \Spryker\Zed\Security\Communication\Plugin\Application\SecurityApplicationPlugin::SERVICE_SECURITY_TOKEN_STORAGE
-     *
-     * @var string
-     */
-    protected const SERVICE_SECURITY_TOKEN_STORAGE = 'security.token_storage';
 
     /**
      * @var \SprykerTest\Zed\SecuritySystemUser\SecuritySystemUserCommunicationTester
@@ -56,8 +51,8 @@ class SystemUserSecurityPluginTest extends Unit
     {
         parent::_before();
 
-        if ($this->tester->isSymfonyVersion5() !== true) {
-            $this->markTestSkipped('Compatible only with `symfony/security-core` package version ^5.0.0. To be removed once Symfony 5 support is discontinued.');
+        if ($this->tester->isSymfonyVersion5() === true) {
+            $this->markTestSkipped('Compatible only with `symfony/security-core` package version >= 6. Will be enabled by default once Symfony 5 support is discontinued.');
         }
 
         $this->tester->enableSecurityApplicationPlugin();
@@ -69,11 +64,13 @@ class SystemUserSecurityPluginTest extends Unit
     public function testSystemUserCanAccessGatewayControllers(): void
     {
         // Arrange
-        $securityPlugin = new SystemUserSecurityPlugin();
+        $securityPlugin = new ZedSystemUserSecurityPlugin();
         $securityPlugin->setFactory($this->tester->getFactory());
         $this->tester->addSecurityPlugin($securityPlugin);
         $this->addAuthentication();
 
+        $container = $this->tester->getContainer();
+        $container->get(static::SERVICE_SESSION)->start();
         $httpKernelBrowser = $this->tester->getHttpKernelBrowser();
 
         // Act
@@ -89,9 +86,10 @@ class SystemUserSecurityPluginTest extends Unit
     public function testSystemUserCanNotAccessGatewayControllersWithInvalidCredentials(): void
     {
         // Arrange
-        $securityPlugin = new SystemUserSecurityPlugin();
+        $securityPlugin = new ZedSystemUserSecurityPlugin();
         $securityPlugin->setFactory($this->tester->getFactory());
         $this->tester->addSecurityPlugin($securityPlugin);
+
         $this->addAuthentication();
 
         $httpKernelBrowser = $this->tester->getHttpKernelBrowser();
@@ -150,7 +148,9 @@ class SystemUserSecurityPluginTest extends Unit
             ])
             ->addAccessRules([['^/', 'ROLE_USER']]);
 
-        $this->tester->mockSecurityPlugin($securityConfiguration);
+        $this->tester->mockZedSecurityPlugin($securityConfiguration);
+        $this->tester->mockSecurityDependencies();
+        $this->tester->enableSecurityApplicationPlugin();
 
         $this->tester->addRoute('test', '/test/gateway/', function () {
             return new Response('test-text');
@@ -171,5 +171,18 @@ class SystemUserSecurityPluginTest extends Unit
         return [
             'HTTP_' . strtoupper(SecuritySystemUserConfig::AUTH_TOKEN) => $token,
         ];
+    }
+
+    /**
+     * @return void
+     */
+    protected function tearDown(): void
+    {
+        parent::tearDown();
+
+        $reflection = new ReflectionClass(SecurityConfigurator::class);
+        $property = $reflection->getProperty('securityConfiguration');
+        $property->setAccessible(true);
+        $property->setValue(null);
     }
 }

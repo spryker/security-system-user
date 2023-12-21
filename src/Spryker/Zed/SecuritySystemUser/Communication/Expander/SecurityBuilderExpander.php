@@ -5,29 +5,20 @@
  * Use of this software requires acceptance of the Evaluation License Agreement. See LICENSE file.
  */
 
-namespace Spryker\Zed\SecuritySystemUser\Communication\Plugin\Security;
+namespace Spryker\Zed\SecuritySystemUser\Communication\Expander;
 
 use Spryker\Service\Container\ContainerInterface;
 use Spryker\Shared\SecurityExtension\Configuration\SecurityBuilderInterface;
-use Spryker\Shared\SecurityExtension\Dependency\Plugin\SecurityPluginInterface;
-use Spryker\Zed\Kernel\Communication\AbstractPlugin;
-use Spryker\Zed\SecuritySystemUser\Communication\Expander\SecurityBuilderExpanderInterface;
-use Spryker\Zed\SecuritySystemUser\Communication\Plugin\Security\Authenticator\TokenAuthenticator;
 use Spryker\Zed\SecuritySystemUser\SecuritySystemUserConfig;
+use Symfony\Component\Security\Core\User\UserProviderInterface;
+use Symfony\Component\Security\Http\Authenticator\AuthenticatorInterface;
 
-/**
- * @deprecated Use {@link \Spryker\Zed\SecuritySystemUser\Communication\Plugin\Security\ZedSystemUserSecurityPlugin} instead.
- *
- * @method \Spryker\Zed\SecuritySystemUser\Communication\SecuritySystemUserCommunicationFactory getFactory()
- * @method \Spryker\Zed\SecuritySystemUser\SecuritySystemUserConfig getConfig()
- * @method \Spryker\Zed\SecuritySystemUser\Business\SecuritySystemUserFacadeInterface getFacade()
- */
-class SystemUserSecurityPlugin extends AbstractPlugin implements SecurityPluginInterface, SecurityBuilderExpanderInterface
+class SecurityBuilderExpander implements SecurityBuilderExpanderInterface
 {
     /**
      * @var string
      */
-    protected const SECURITY_FIREWALL_NAME = 'SystemUser';
+    protected const SECURITY_FIREWALL_NAME = 'system_user';
 
     /**
      * @var string
@@ -35,11 +26,33 @@ class SystemUserSecurityPlugin extends AbstractPlugin implements SecurityPluginI
     protected const SECURITY_SYSTEM_USER_TOKEN_AUTHENTICATOR = 'security.system_user.token.authenticator';
 
     /**
-     * {@inheritDoc}
-     * - Extends security service with SystemUser firewall.
-     *
-     * @api
-     *
+     * @var string
+     */
+    protected const GATEWAY_PATTERN = '^/(.+)/gateway/';
+
+    /**
+     * @var \Symfony\Component\Security\Core\User\UserProviderInterface
+     */
+    protected UserProviderInterface $userProvider;
+
+    /**
+     * @var \Symfony\Component\Security\Http\Authenticator\AuthenticatorInterface
+     */
+    protected AuthenticatorInterface $authenticator;
+
+    /**
+     * @param \Symfony\Component\Security\Core\User\UserProviderInterface $userProvider
+     * @param \Symfony\Component\Security\Http\Authenticator\AuthenticatorInterface $authenticator
+     */
+    public function __construct(
+        UserProviderInterface $userProvider,
+        AuthenticatorInterface $authenticator
+    ) {
+        $this->userProvider = $userProvider;
+        $this->authenticator = $authenticator;
+    }
+
+    /**
      * @param \Spryker\Shared\SecurityExtension\Configuration\SecurityBuilderInterface $securityBuilder
      * @param \Spryker\Service\Container\ContainerInterface $container
      *
@@ -47,12 +60,9 @@ class SystemUserSecurityPlugin extends AbstractPlugin implements SecurityPluginI
      */
     public function extend(SecurityBuilderInterface $securityBuilder, ContainerInterface $container): SecurityBuilderInterface
     {
-        $container->set(static::SECURITY_SYSTEM_USER_TOKEN_AUTHENTICATOR, function () {
-            return new TokenAuthenticator();
-        });
-
         $securityBuilder = $this->addFirewall($securityBuilder);
         $securityBuilder = $this->addAccessRules($securityBuilder);
+        $this->addAuthenticator($container);
 
         return $securityBuilder;
     }
@@ -64,19 +74,17 @@ class SystemUserSecurityPlugin extends AbstractPlugin implements SecurityPluginI
      */
     protected function addFirewall(SecurityBuilderInterface $securityBuilder): SecurityBuilderInterface
     {
-        $securityBuilder->addFirewall(static::SECURITY_FIREWALL_NAME, [
-            'pattern' => '^/(.+)/gateway/',
-            'guard' => [
+        return $securityBuilder->addFirewall(static::SECURITY_FIREWALL_NAME, [
+            'pattern' => static::GATEWAY_PATTERN,
+            'form' => [
                 'authenticators' => [
                     static::SECURITY_SYSTEM_USER_TOKEN_AUTHENTICATOR,
                 ],
             ],
             'users' => function () {
-                return $this->getFactory()->createSystemUserProvider();
+                return $this->userProvider;
             },
         ]);
-
-        return $securityBuilder;
     }
 
     /**
@@ -86,13 +94,23 @@ class SystemUserSecurityPlugin extends AbstractPlugin implements SecurityPluginI
      */
     protected function addAccessRules(SecurityBuilderInterface $securityBuilder): SecurityBuilderInterface
     {
-        $securityBuilder->addAccessRules([
+        return $securityBuilder->addAccessRules([
             [
-                '^/(.+)/gateway/',
+                static::GATEWAY_PATTERN,
                 SecuritySystemUserConfig::ROLE_SYSTEM_USER,
             ],
         ]);
+    }
 
-        return $securityBuilder;
+    /**
+     * @param \Spryker\Service\Container\ContainerInterface $container
+     *
+     * @return void
+     */
+    protected function addAuthenticator(ContainerInterface $container): void
+    {
+        $container->set(static::SECURITY_SYSTEM_USER_TOKEN_AUTHENTICATOR, function () {
+            return $this->authenticator;
+        });
     }
 }
