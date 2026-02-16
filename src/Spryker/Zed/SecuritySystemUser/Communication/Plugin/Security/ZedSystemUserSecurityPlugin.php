@@ -15,7 +15,6 @@ use Spryker\Zed\Kernel\Communication\AbstractPlugin;
 /**
  * @method \Spryker\Zed\SecuritySystemUser\Communication\SecuritySystemUserCommunicationFactory getFactory()
  * @method \Spryker\Zed\SecuritySystemUser\SecuritySystemUserConfig getConfig()
- * @method \Spryker\Zed\SecuritySystemUser\Business\SecuritySystemUserFacadeInterface getFacade()
  */
 class ZedSystemUserSecurityPlugin extends AbstractPlugin implements SecurityPluginInterface
 {

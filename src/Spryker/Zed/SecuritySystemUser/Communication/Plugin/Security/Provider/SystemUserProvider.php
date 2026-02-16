@@ -20,7 +20,6 @@ use Symfony\Component\Security\Core\User\UserProviderInterface;
 /**
  * @method \Spryker\Zed\SecuritySystemUser\Communication\SecuritySystemUserCommunicationFactory getFactory()
  * @method \Spryker\Zed\SecuritySystemUser\SecuritySystemUserConfig getConfig()
- * @method \Spryker\Zed\SecuritySystemUser\Business\SecuritySystemUserFacadeInterface getFacade()
  */
 class SystemUserProvider extends AbstractPlugin implements UserProviderInterface
 {
