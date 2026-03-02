@@ -28,19 +28,11 @@ use Symfony\Component\Security\Http\Authenticator\AuthenticatorInterface;
  */
 class SecuritySystemUserCommunicationFactory extends AbstractCommunicationFactory
 {
-    /**
-     * @return \Symfony\Component\Security\Core\User\UserProviderInterface
-     */
     public function createSystemUserProvider(): UserProviderInterface
     {
         return new SystemUserProvider();
     }
 
-    /**
-     * @param \Generated\Shared\Transfer\UserTransfer $userTransfer
-     *
-     * @return \Spryker\Zed\SecuritySystemUser\Communication\Security\SystemUserInterface
-     */
     public function createSecurityUser(UserTransfer $userTransfer): SystemUserInterface
     {
         return new SystemUser(
@@ -49,17 +41,11 @@ class SecuritySystemUserCommunicationFactory extends AbstractCommunicationFactor
         );
     }
 
-    /**
-     * @return \Spryker\Zed\SecuritySystemUser\Dependency\Facade\SecuritySystemUserToUserFacadeInterface
-     */
     public function getUserFacade(): SecuritySystemUserToUserFacadeInterface
     {
         return $this->getProvidedDependency(SecuritySystemUserDependencyProvider::FACADE_USER);
     }
 
-    /**
-     * @return \Symfony\Component\Security\Http\Authenticator\AuthenticatorInterface
-     */
     public function createSystemUserTokenAuthenticator(): AuthenticatorInterface
     {
         return new SystemUserTokenAuthenticator(
@@ -68,9 +54,6 @@ class SecuritySystemUserCommunicationFactory extends AbstractCommunicationFactor
         );
     }
 
-    /**
-     * @return \Spryker\Zed\SecuritySystemUser\Communication\Expander\SecurityBuilderExpanderInterface
-     */
     public function createSecurityBuilderExpander(): SecurityBuilderExpanderInterface
     {
         if (class_exists(AuthenticationProviderManager::class) === true) {

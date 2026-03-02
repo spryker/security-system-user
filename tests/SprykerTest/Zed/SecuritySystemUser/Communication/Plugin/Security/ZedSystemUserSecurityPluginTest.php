@@ -44,9 +44,6 @@ class ZedSystemUserSecurityPluginTest extends Unit
      */
     protected $tester;
 
-    /**
-     * @return void
-     */
     protected function _before(): void
     {
         parent::_before();
@@ -58,9 +55,6 @@ class ZedSystemUserSecurityPluginTest extends Unit
         $this->tester->enableSecurityApplicationPlugin();
     }
 
-    /**
-     * @return void
-     */
     public function testSystemUserCanAccessGatewayControllers(): void
     {
         // Arrange
@@ -80,9 +74,6 @@ class ZedSystemUserSecurityPluginTest extends Unit
         $this->assertSame('test-text', $httpKernelBrowser->getResponse()->getContent());
     }
 
-    /**
-     * @return void
-     */
     public function testSystemUserCanNotAccessGatewayControllersWithInvalidCredentials(): void
     {
         // Arrange
@@ -104,9 +95,6 @@ class ZedSystemUserSecurityPluginTest extends Unit
         $this->assertSame(403, $httpKernelBrowser->getResponse()->getStatusCode());
     }
 
-    /**
-     * @return void
-     */
     public function testSystemUserSessionRedisLifeTimeCalculatorPluginReturnsTrueForValidHeader(): void
     {
         // Arrange
@@ -120,9 +108,6 @@ class ZedSystemUserSecurityPluginTest extends Unit
         $this->assertTrue($isApplicable);
     }
 
-    /**
-     * @return void
-     */
     public function testSystemUserSessionRedisLifeTimeCalculatorPluginReturnsFalseForEmptyHeader(): void
     {
         // Arrange
@@ -135,9 +120,6 @@ class ZedSystemUserSecurityPluginTest extends Unit
         $this->assertFalse($isApplicable);
     }
 
-    /**
-     * @return void
-     */
     protected function addAuthentication(): void
     {
         $securityConfiguration = new SecurityConfiguration();
@@ -157,11 +139,6 @@ class ZedSystemUserSecurityPluginTest extends Unit
         });
     }
 
-    /**
-     * @param \Spryker\Zed\Kernel\Communication\AbstractPlugin $securityPlugin
-     *
-     * @return array
-     */
     protected function createRequestHeaders(AbstractPlugin $securityPlugin): array
     {
         $usersCredentials = $securityPlugin->getConfig()->getUsersCredentials();
@@ -173,9 +150,6 @@ class ZedSystemUserSecurityPluginTest extends Unit
         ];
     }
 
-    /**
-     * @return void
-     */
     protected function tearDown(): void
     {
         parent::tearDown();

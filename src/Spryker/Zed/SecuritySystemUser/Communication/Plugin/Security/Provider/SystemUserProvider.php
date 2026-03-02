@@ -33,11 +33,6 @@ class SystemUserProvider extends AbstractPlugin implements UserProviderInterface
         return $this->loadUserByIdentifier($username);
     }
 
-    /**
-     * @param string $identifier
-     *
-     * @return \Symfony\Component\Security\Core\User\UserInterface
-     */
     public function loadUserByIdentifier(string $identifier): UserInterface
     {
         return $this->getUserByToken($identifier);
@@ -118,20 +113,11 @@ class SystemUserProvider extends AbstractPlugin implements UserProviderInterface
         throw $this->getUserNotFoundException();
     }
 
-    /**
-     * @param string $userToken
-     * @param string $token
-     *
-     * @return bool
-     */
     protected function isValidToken(string $userToken, string $token): bool
     {
         return password_verify($userToken, base64_decode($token));
     }
 
-    /**
-     * @return \Symfony\Component\Security\Core\Exception\AuthenticationException
-     */
     protected function getUserNotFoundException(): AuthenticationException
     {
         if ($this->isSymfonyVersion5() === true) {

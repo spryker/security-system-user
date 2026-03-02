@@ -57,10 +57,6 @@ class SystemUserTokenAuthenticator implements AuthenticatorInterface, Authentica
      */
     protected UserProviderInterface $userProvider;
 
-    /**
-     * @param \Spryker\Zed\SecuritySystemUser\Dependency\Facade\SecuritySystemUserToUserFacadeInterface $userFacade
-     * @param \Symfony\Component\Security\Core\User\UserProviderInterface $userProvider
-     */
     public function __construct(
         SecuritySystemUserToUserFacadeInterface $userFacade,
         UserProviderInterface $userProvider
@@ -91,23 +87,11 @@ class SystemUserTokenAuthenticator implements AuthenticatorInterface, Authentica
         );
     }
 
-    /**
-     * @param \Symfony\Component\HttpFoundation\Request $request
-     *
-     * @return bool|null
-     */
     public function supports(Request $request): ?bool
     {
         return $request->headers->has(strtolower(SecuritySystemUserConfig::AUTH_TOKEN));
     }
 
-    /**
-     * @param \Symfony\Component\HttpFoundation\Request $request
-     * @param \Symfony\Component\Security\Core\Authentication\Token\TokenInterface $token
-     * @param string $firewallName
-     *
-     * @return \Symfony\Component\HttpFoundation\Response|null
-     */
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $firewallName): ?Response
     {
         /** @var \Spryker\Zed\SecuritySystemUser\Communication\Security\SystemUserInterface $user */
@@ -137,12 +121,6 @@ class SystemUserTokenAuthenticator implements AuthenticatorInterface, Authentica
         return new JsonResponse($data, 403);
     }
 
-    /**
-     * @param \Symfony\Component\HttpFoundation\Request $request
-     * @param \Symfony\Component\Security\Core\Exception\AuthenticationException|null $authException
-     *
-     * @return \Symfony\Component\HttpFoundation\JsonResponse
-     */
     public function start(Request $request, ?AuthenticationException $authException = null): JsonResponse
     {
         $data = [
@@ -152,12 +130,6 @@ class SystemUserTokenAuthenticator implements AuthenticatorInterface, Authentica
         return new JsonResponse($data, 401);
     }
 
-    /**
-     * @param \Symfony\Component\Security\Http\Authenticator\Passport\Passport $passport
-     * @param string $firewallName
-     *
-     * @return \Symfony\Component\Security\Core\Authentication\Token\TokenInterface
-     */
     public function createToken(Passport $passport, string $firewallName): TokenInterface
     {
         return new PostAuthenticationToken(

@@ -63,25 +63,16 @@ class SystemUser implements SystemUserInterface
         return $this->username;
     }
 
-    /**
-     * @return string|null
-     */
     public function getPassword(): ?string
     {
         return $this->password;
     }
 
-    /**
-     * @return string
-     */
     public function getUserIdentifier(): string
     {
         return $this->username;
     }
 
-    /**
-     * @return void
-     */
     public function eraseCredentials(): void
     {
     }

@@ -40,10 +40,6 @@ class SecurityBuilderExpander implements SecurityBuilderExpanderInterface
      */
     protected AuthenticatorInterface $authenticator;
 
-    /**
-     * @param \Symfony\Component\Security\Core\User\UserProviderInterface $userProvider
-     * @param \Symfony\Component\Security\Http\Authenticator\AuthenticatorInterface $authenticator
-     */
     public function __construct(
         UserProviderInterface $userProvider,
         AuthenticatorInterface $authenticator
@@ -52,12 +48,6 @@ class SecurityBuilderExpander implements SecurityBuilderExpanderInterface
         $this->authenticator = $authenticator;
     }
 
-    /**
-     * @param \Spryker\Shared\SecurityExtension\Configuration\SecurityBuilderInterface $securityBuilder
-     * @param \Spryker\Service\Container\ContainerInterface $container
-     *
-     * @return \Spryker\Shared\SecurityExtension\Configuration\SecurityBuilderInterface
-     */
     public function extend(SecurityBuilderInterface $securityBuilder, ContainerInterface $container): SecurityBuilderInterface
     {
         $securityBuilder = $this->addFirewall($securityBuilder);
@@ -67,11 +57,6 @@ class SecurityBuilderExpander implements SecurityBuilderExpanderInterface
         return $securityBuilder;
     }
 
-    /**
-     * @param \Spryker\Shared\SecurityExtension\Configuration\SecurityBuilderInterface $securityBuilder
-     *
-     * @return \Spryker\Shared\SecurityExtension\Configuration\SecurityBuilderInterface
-     */
     protected function addFirewall(SecurityBuilderInterface $securityBuilder): SecurityBuilderInterface
     {
         return $securityBuilder->addFirewall(static::SECURITY_FIREWALL_NAME, [
@@ -87,11 +72,6 @@ class SecurityBuilderExpander implements SecurityBuilderExpanderInterface
         ]);
     }
 
-    /**
-     * @param \Spryker\Shared\SecurityExtension\Configuration\SecurityBuilderInterface $securityBuilder
-     *
-     * @return \Spryker\Shared\SecurityExtension\Configuration\SecurityBuilderInterface
-     */
     protected function addAccessRules(SecurityBuilderInterface $securityBuilder): SecurityBuilderInterface
     {
         return $securityBuilder->addAccessRules([
@@ -102,11 +82,6 @@ class SecurityBuilderExpander implements SecurityBuilderExpanderInterface
         ]);
     }
 
-    /**
-     * @param \Spryker\Service\Container\ContainerInterface $container
-     *
-     * @return void
-     */
     protected function addAuthenticator(ContainerInterface $container): void
     {
         $container->set(static::SECURITY_SYSTEM_USER_TOKEN_AUTHENTICATOR, function () {
