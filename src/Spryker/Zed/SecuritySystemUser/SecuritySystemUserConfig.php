@@ -13,11 +13,15 @@ use Spryker\Zed\Kernel\AbstractBundleConfig;
 class SecuritySystemUserConfig extends AbstractBundleConfig
 {
     /**
+     * @api
+     *
      * @var string
      */
     public const ROLE_SYSTEM_USER = 'ROLE_SYSTEM_USER';
 
     /**
+     * @api
+     *
      * @var string
      */
     public const AUTH_TOKEN = 'Auth-Token';
